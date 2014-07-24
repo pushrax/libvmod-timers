@@ -27,3 +27,6 @@ Makefile.in
 
 /src/vcc_if.c
 /src/vcc_if.h
+/src/vmod_timers.man.rst
+/src/vmod_timers.rst
+/vmod_timers.3

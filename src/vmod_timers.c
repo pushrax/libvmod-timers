@@ -180,7 +180,7 @@ vmod_req_response_time( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     // The response may not have been sent yet (say you're calling this
     // from vcl_recv) - Return -1 in that case.
 
-    int rv = (int) ((ctx->req->wrk->t_prev - ctx->req->t_first) * cfg->multiplier);
+    int rv = (int) ((ctx->req->t_prev - ctx->req->t_first) * cfg->multiplier);
     return rv >= 0 ? rv : -1;
 }
 

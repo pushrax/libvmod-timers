@@ -15,7 +15,9 @@
 #define _DEBUG 0
 #endif
 
-/*  XXX This is all true for varnish 3.0.3 - the varnish 3 BRANCH is already structured,
+/*  XXX None of this is true now.
+
+    XXX This is all true for varnish 3.0.3 - the varnish 3 BRANCH is already structured,
     differently. Especially the session struct has changed, with more data moving into
     the request struct instead :(
 
@@ -139,7 +141,7 @@ vmod_subtract( const struct vrt_ctx *ctx, VCL_INT i, VCL_INT j ) {
 // Timestamp of when the request started
 VCL_REAL
 vmod_req_start( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
-    return 0;//(double) sp->t_req;
+    return ctx->req->t_first;
 }
 
 // Timestamp of when the request started as a string representation.
@@ -150,9 +152,7 @@ VCL_TIME vmod_req_start_as_string() __attribute__((alias("vmod_req_start")));
 // Timestamp of when the request finished
 VCL_REAL
 vmod_req_end( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
-    config_t *cfg   = priv->priv;
-
-    return 0;//(double) sp->t_end;
+    return ctx->req->t_prev;
 }
 
 // Timestamp of when the request started as a string representation.
@@ -169,7 +169,7 @@ VCL_INT
 vmod_req_handle_time( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     config_t *cfg   = priv->priv;
 
-    return 0;//(int) ((sp->t_req - sp->t_open) * cfg->multiplier);
+    return (int) ((ctx->req->t_req - ctx->req->sp->t_open) * cfg->multiplier);
 }
 
 // Duration of Sent to Backend -> First byte.
@@ -180,7 +180,7 @@ vmod_req_response_time( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     // The response may not have been sent yet (say you're calling this
     // from vcl_recv) - Return -1 in that case.
 
-    int rv = 0;//(int) ((sp->t_resp - sp->t_req) * cfg->multiplier);
+    int rv = (int) ((ctx->req->wrk->t_prev - ctx->req->t_first) * cfg->multiplier);
     return rv >= 0 ? rv : -1;
 }
 
@@ -197,6 +197,5 @@ vmod_req_delivery_time( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     // The response may not have been sent yet (say you're calling this
     // from vcl_recv) - Return -1 in that case.
 
-    int rv = 0;//(int) ((sp->t_end - sp->t_resp) * cfg->multiplier);
-    return rv >= 0 ? rv : -1;
+    return -1;
 }

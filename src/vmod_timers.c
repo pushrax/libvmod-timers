@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "vrt.h"
-#include "bin/varnishd/cache.h"
+#include "cache/cache.h"
 
 #include "vcc_if.h"
 
@@ -104,8 +104,8 @@ init_function(struct vmod_priv *priv, const struct VCL_conf *conf)
 // **********************
 
 // Set the multiplication factor
-void
-vmod_unit( struct sess *sp, struct vmod_priv *priv, const char *unit ) {
+VCL_VOID
+vmod_unit( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING unit ) {
     config_t *cfg   = priv->priv;
 
     cfg->multiplier =
@@ -121,14 +121,14 @@ vmod_unit( struct sess *sp, struct vmod_priv *priv, const char *unit ) {
 // **********************
 
 // VCL doesn't let you do math - simple addition function
-int
-vmod_add( struct sess *sp, int i, int j ) {
+VCL_INT
+vmod_add( const struct vrt_ctx *ctx, VCL_INT i, VCL_INT j ) {
     return i + j;
 }
 
 // VCL doesn't let you do math - simple subtraction function
-int
-vmod_subtract( struct sess *sp, int i, int j ) {
+VCL_INT
+vmod_subtract( const struct vrt_ctx *ctx, VCL_INT i, VCL_INT j ) {
     return i - j;
 }
 
@@ -137,27 +137,27 @@ vmod_subtract( struct sess *sp, int i, int j ) {
 // **********************
 
 // Timestamp of when the request started
-double
-vmod_req_start( struct sess *sp, struct vmod_priv *priv ) {
-    return (double) sp->t_req;
+VCL_REAL
+vmod_req_start( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
+    return 0;//(double) sp->t_req;
 }
 
 // Timestamp of when the request started as a string representation.
 // Varnish will represent the result differently by the type we use in the .vcc
-double vmod_req_start_as_string() __attribute__((alias("vmod_req_start")));
+VCL_TIME vmod_req_start_as_string() __attribute__((alias("vmod_req_start")));
 
 
 // Timestamp of when the request finished
-double
-vmod_req_end( struct sess *sp, struct vmod_priv *priv ) {
+VCL_REAL
+vmod_req_end( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     config_t *cfg   = priv->priv;
 
-    return (double) sp->t_end;
+    return 0;//(double) sp->t_end;
 }
 
 // Timestamp of when the request started as a string representation.
 // Varnish will represent the result differently by the type we use in the .vcc
-double vmod_req_end_as_string() __attribute__((alias("vmod_req_end")));
+VCL_TIME vmod_req_end_as_string() __attribute__((alias("vmod_req_end")));
 
 
 // **********************
@@ -165,22 +165,22 @@ double vmod_req_end_as_string() __attribute__((alias("vmod_req_end")));
 // **********************
 
 // Duration of Accept -> Sent to backend.
-int
-vmod_req_handle_time( struct sess *sp, struct vmod_priv *priv ) {
+VCL_INT
+vmod_req_handle_time( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     config_t *cfg   = priv->priv;
 
-    return (int) ((sp->t_req - sp->t_open) * cfg->multiplier);
+    return 0;//(int) ((sp->t_req - sp->t_open) * cfg->multiplier);
 }
 
 // Duration of Sent to Backend -> First byte.
-int
-vmod_req_response_time( struct sess *sp, struct vmod_priv *priv ) {
+VCL_INT
+vmod_req_response_time( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     config_t *cfg   = priv->priv;
 
     // The response may not have been sent yet (say you're calling this
     // from vcl_recv) - Return -1 in that case.
 
-    int rv = (int) ((sp->t_resp - sp->t_req) * cfg->multiplier);
+    int rv = 0;//(int) ((sp->t_resp - sp->t_req) * cfg->multiplier);
     return rv >= 0 ? rv : -1;
 }
 
@@ -190,13 +190,13 @@ vmod_req_response_time( struct sess *sp, struct vmod_priv *priv ) {
 // meaning this will always return -1. I'm leaving it here for completeness
 // sake, and it may become useful if there appears a vcl hook for after last
 // byte.
-int
-vmod_req_delivery_time( struct sess *sp, struct vmod_priv *priv ) {
+VCL_INT
+vmod_req_delivery_time( const struct vrt_ctx *ctx, struct vmod_priv *priv ) {
     config_t *cfg   = priv->priv;
 
     // The response may not have been sent yet (say you're calling this
     // from vcl_recv) - Return -1 in that case.
 
-    int rv = (int) ((sp->t_end - sp->t_resp) * cfg->multiplier);
+    int rv = 0;//(int) ((sp->t_end - sp->t_resp) * cfg->multiplier);
     return rv >= 0 ? rv : -1;
 }

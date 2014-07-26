@@ -1,2 +1,2 @@
 $Module timers 3 Timers
-$Function REAL req_start(PRIV_VCL)
+$Function TIME req_start(PRIV_VCL)
